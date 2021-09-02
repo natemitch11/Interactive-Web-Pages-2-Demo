@@ -31,3 +31,87 @@ function createCharacterCard(char) {
 function clearCharacters() {
   charContainer.innerHTML = ``
 }
+
+function getAllChars() {
+  axios.get("http://localhost:4000/characters")
+    .then( res =>{
+      clearCharacters();
+      console.log(res.data)
+      for(let char of res.data){
+        createCharacterCard(char)
+      }
+    } )
+    .catch(err => console.log(err));
+}
+
+getAllBtn.addEventListener("click", getAllChars)
+
+///////////////////////////////////////////////////////////////////////////////
+
+function getSingleChar (e) {
+  let name = e.target.id;
+  axios.get(`http://localhost:4000/character/${name}`)
+    .then(res => {
+      clearCharacters()
+      console.log(res.data)
+      let newChar = res.data
+      createCharacterCard(newChar)
+    })
+    .catch(error => console.log(error));
+}
+
+for (let btn of charBtns){
+  btn.addEventListener('click', getSingleChar)
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+function getOldChars (e) {
+  e.preventDefault();
+  let age = ageInput.value
+  axios.get(`http://localhost:4000/character/?age=${age}`)
+    .then(res => {
+      clearCharacters()
+      console.log(res.data)
+      for(let char of res.data){
+        createCharacterCard(char)
+      }
+    })
+    .catch(err => console.log(err));
+  }
+ageForm.addEventListener("submit", getOldChars)
+
+///////////////////////////////////////////////////////////////////////////////
+function createNewChar(e){
+  e.preventDefault();
+
+  let newLikes = newLikesText.value.split(",");
+
+  let body = {
+    firstName: newFirstInput.value,
+    lastName: newLastInput.value,
+    gender: newGenderDropDown.value,
+    age: +newAgeInput.value,
+    likes: newLikes
+  }
+
+  axios.post("http://localhost:4000/character", body)
+    .then(res =>{
+      clearCharacters();
+      console.log(res.data)
+      for(let char of res.data){
+        createCharacterCard(char)
+      }
+    })
+    .catch(err => console.log(err));
+
+  newFirstInput.value = ""
+  newLastInput.value = ""
+  newGenderDropDown.value = "female"
+  newAgeInput.value = ""
+  newLikesText.value = ""
+
+}
+
+createForm.addEventListener('submit', createNewChar)
